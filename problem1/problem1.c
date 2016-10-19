@@ -34,10 +34,10 @@ int main() {
 	#ifdef DEBUG
 	printf ("Got ptr = %p\n", buffer);
 	#endif
+
+	//POSIX threads creation
 	
 	//done with the program, so detach the shared segment and terminate
 	shmdt((void *)buffer);
-	
-	
 	return 0;
 }
