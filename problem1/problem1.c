@@ -57,7 +57,7 @@ int main() {
 		}
 	}
 	//done with the program, so detach the shared segment and terminate
-	shmdt((void *)buffer);
+	shmctl(shm_id, IPC_RMID, NULL);
 	
 	return 0;
 }

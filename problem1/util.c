@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "util.h"
 
+int head = 0;
+int tail = 0;
+
 void * producer(void * arg) {
 	printf("I am producer thread %d\n", *(int *)arg);
 	return NULL;
