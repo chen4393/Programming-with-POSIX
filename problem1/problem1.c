@@ -17,7 +17,7 @@ int main() {
 	key_t key = 4455;
 	int flag = 1023;
 	//shared memory segment creation
-	shm_id = shmget (key, 2 * sizeof(item_t), flag);
+	shm_id = shmget (key, sizeof(item_t), flag);
 	if(shm_id == -1) {
 		perror("shmget failed");
 		exit(1);

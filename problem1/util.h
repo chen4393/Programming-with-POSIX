@@ -1,10 +1,14 @@
 #define BUF_SIZE 1024
 #define DEBUG
 
+int head = 0;
+int tail = 0;
+
 typedef enum color_type {
 	RED, 
 	BLACK, 
-	WHITE
+	WHITE,
+	EMPTY
 }color_t;
 
 typedef struct item_type {
@@ -14,5 +18,5 @@ typedef struct item_type {
 
 void * producer(void *);
 void * consumer(void *);
-//void item_insert(item_t);
-//void item_remove(item_t);
+void item_insert(item_t, item_t *);
+item_t item_remove(item_t *);
