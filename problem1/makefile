@@ -1,7 +1,7 @@
 all: problem1
 
-problem1: problem1.c util.c util.h
-	cc -pthread -o problem1 problem1.c util.c util.h
+problem1: problem1.c util.c
+	cc problem1.c util.c -o problem1 -lpthread
 
 clean:
 	rm problem1 *.o

@@ -7,13 +7,12 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include "util.h"
-
 
 int main() {
 	
 	int shm_id;
-	item_t *buffer;
 	key_t key = 4455;
 	int flag = 1023;
 	//shared memory segment creation
@@ -35,6 +34,12 @@ int main() {
 	printf ("Got ptr = %p\n", buffer);
 	#endif
 
+	//Synchronization Primitive
+	sem_init(&mutex, 0, 1);//semaphore mutex = 1;
+	sem_init(&empty, 0, BUFSIZE);//semaphore empty = N;
+	sem_init(&full, 0, 0);//semaphore full = 0;
+	
+	
 	//POSIX threads creation
 	pthread_t tid[4];
 	int i;
@@ -44,7 +49,7 @@ int main() {
 			perror("pthread_create failed");
 			exit(3);
 		}
-		sleep(1);
+		//usleep(10);
 	}
 	if(pthread_create(tid + i, NULL, consumer, (void *)&i) != 0) {
 			perror("pthread_create failed");
@@ -56,6 +61,9 @@ int main() {
 			exit(2);
 		}
 	}
+	sem_destroy(&mutex); /* destroy semaphore */
+	sem_destroy(&empty); /* destroy semaphore */
+	sem_destroy(&full); /* destroy semaphore */
 	//done with the program, so detach the shared segment and terminate
 	shmctl(shm_id, IPC_RMID, NULL);
 	

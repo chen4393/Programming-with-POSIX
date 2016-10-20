@@ -1,11 +1,11 @@
-#define BUF_SIZE 1024
+#include <semaphore.h>
+#define BUFSIZE 2
 #define DEBUG
 
 typedef enum color_type {
 	RED, 
 	BLACK, 
-	WHITE,
-	EMPTY
+	WHITE
 }color_t;
 
 typedef struct item_type {
@@ -13,7 +13,13 @@ typedef struct item_type {
 	int timestamp;
 }item_t;
 
+item_t *buffer;
+
+sem_t mutex;
+sem_t empty;
+sem_t full;
+
 void * producer(void *);
 void * consumer(void *);
-void item_insert(item_t item, item_t * buffer);
-item_t item_remove(item_t * buffer);
+void item_deposit(item_t item);
+void item_remove(item_t * item);
