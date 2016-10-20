@@ -1,4 +1,5 @@
 #include <semaphore.h>
+#include <stdio.h>
 #define BUFSIZE 2
 #define DEBUG
 
@@ -21,6 +22,8 @@ int tail = 0;
 sem_t mutex;
 sem_t empty;
 sem_t full;
+
+FILE *fp1, *fp2, *fp3, *fp4;
 
 void * producer(void *);
 void * consumer(void *);

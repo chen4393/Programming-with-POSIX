@@ -1,7 +1,7 @@
-all: problem1
+all: prod_cons
 
-problem1: problem1.c
-	cc problem1.c -o problem1 -lpthread
+prod_cons: prod_cons.c
+	cc prod_cons.c -o prod_cons -lpthread
 
 clean:
-	rm problem1 *.o
+	rm prod_cons *.o *.txt
