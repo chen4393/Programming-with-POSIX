@@ -15,6 +15,9 @@ typedef struct item_type {
 
 item_t *buffer;
 
+int head = 0;
+int tail = 0;
+
 sem_t mutex;
 sem_t empty;
 sem_t full;
