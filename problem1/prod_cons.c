@@ -17,7 +17,7 @@ int main() {
 	key_t key = 4455;
 	int flag = 1023;
 	//shared memory segment creation
-	shm_id = shmget (key, sizeof(item_t), flag);
+	shm_id = shmget (key, BUFSIZE * sizeof(item_t), flag);
 	if(shm_id == -1) {
 		perror("shmget failed");
 		exit(1);
@@ -55,7 +55,7 @@ int main() {
 			perror("pthread_create failed");
 			exit(3);
 		}
-		usleep(100);
+		usleep(1000);
 	}
 	if(pthread_create(tid + i, NULL, consumer, (void *)&i) != 0) {
 			perror("pthread_create failed");
@@ -88,7 +88,7 @@ void * producer(void * arg) {
 	char prod_info[256];
 	item_t item;
 	struct timeval time_prod;
-	for(i = 0; i < 1000; i++) {
+	for(i = 0; i < ITERATIONS; i++) {
 		if(tid == 0) {
 			sem_wait(&empty);
 			sem_wait(&mutex);
@@ -140,7 +140,7 @@ void * consumer(void * arg) {
 	int i;
 	item_t item;
 	char cons_info[256];
-	for(i = 0; i < 3000; i++) {
+	for(i = 0; i < 3 * ITERATIONS; i++) {
 		sem_wait(&full);
 		sem_wait(&mutex);
 		/* START CRITICAL SECTION */
@@ -166,10 +166,12 @@ void * consumer(void * arg) {
 void item_deposit(item_t item) {
 	buffer[tail] = item;
 	tail = (tail + 1) % BUFSIZE;
+	fprintf(stderr, "Deposit one item!\n");
 }
 
 void item_remove(item_t * item) {
 	*item = buffer[head];
 	head = (head + 1) % BUFSIZE;
+	fprintf(stderr, "Remove one item!\n");
 }
 
