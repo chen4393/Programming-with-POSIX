@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #define BUFSIZE 2
-#define ITERATIONS 1000
+#define ITERATIONS 10
 #define DEBUG
 
 typedef enum color_type {
