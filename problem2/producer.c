@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 			
 			pthread_mutex_lock(&(bufp->buffer_lock));
 			//fprintf(stderr, "Producer RED grab the lock!\n");
-			while(bufp->num_items == BUFSIZE)
+			while(bufp->num_items != 0)
 				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
 			/* START CRITICAL SECTION */
 			//fprintf(stderr, "Producer RED enter the CRITICAL SECTION!\n");
@@ -66,12 +66,12 @@ int main(int argc, char* argv[]) {
 			sprintf(prod_info, "RED %d\n", item.timestamp);//generate the corresponding string
 			fprintf(fp1, "%s", prod_info);
 			/* END CRITICAL SECTION */
-			pthread_mutex_unlock(&bufp->buffer_lock);
 			pthread_cond_signal(&bufp->non_empty);
+			pthread_mutex_unlock(&bufp->buffer_lock);
 		}
 		else if(color == 2) {
 			pthread_mutex_lock(&(bufp->buffer_lock));
-			while(bufp->num_items == BUFSIZE)
+			while(bufp->num_items != 0)
 				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
 			/* START CRITICAL SECTION */
 			item.color = BLACK;//generate a new item
@@ -81,12 +81,12 @@ int main(int argc, char* argv[]) {
 			sprintf(prod_info, "BLACK %d\n", item.timestamp);//generate the corresponding string
 			fprintf(fp2, "%s", prod_info);
 			/* END CRITICAL SECTION */
-			pthread_mutex_unlock(&bufp->buffer_lock);
 			pthread_cond_signal(&bufp->non_empty);
+			pthread_mutex_unlock(&bufp->buffer_lock);
 		}
 		else {
 			pthread_mutex_lock(&(bufp->buffer_lock));
-			while(bufp->num_items == BUFSIZE)
+			while(bufp->num_items != 0)
 				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
 			/* START CRITICAL SECTION */
 			item.color = WHITE;//generate a new item
@@ -96,8 +96,8 @@ int main(int argc, char* argv[]) {
 			sprintf(prod_info, "WHITE %d\n", item.timestamp);//generate the corresponding string
 			fprintf(fp3, "%s", prod_info);
 			/* END CRITICAL SECTION */
-			pthread_mutex_unlock(&bufp->buffer_lock);
 			pthread_cond_signal(&bufp->non_empty);
+			pthread_mutex_unlock(&bufp->buffer_lock);
 		}
 	}
 	
@@ -120,12 +120,12 @@ int main(int argc, char* argv[]) {
 void put_item(item_t item)
 {
 	//fprintf(stderr, "WE ARE IN THE PUT FUNCTION!\n");
-	fprintf(stderr, "bufin = %d before insert\n", bufp->bufin);
+	//fprintf(stderr, "bufin = %d before insert\n", bufp->bufin);
 	fprintf(stderr, "num_items = %d before insert\n", bufp->num_items);
 	bufp->buffer[bufp->bufin] = item;
 	bufp->bufin = (bufp->bufin + 1) % BUFSIZE;
 	bufp->num_items++;
-	fprintf(stderr, "bufin = %d after insert\n", bufp->bufin);
+	//fprintf(stderr, "bufin = %d after insert\n", bufp->bufin);
 	fprintf(stderr, "num_items = %d after insert\n", bufp->num_items);
 	fprintf(stderr, "put one item!\n");
 	return;

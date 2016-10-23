@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	for(i = 0; i < 3 * ITERATIONS; i++) {
 		pthread_mutex_lock(&(bufp->buffer_lock));
 		while(bufp->num_items == 0)
-				while(pthread_cond_wait(&bufp->non_empty, &bufp->buffer_lock) != 0);
+			while(pthread_cond_wait(&bufp->non_empty, &bufp->buffer_lock) != 0);
 		/* START CRITICAL SECTION */
 		get_item(&item);
 		if(item.color == RED) {
@@ -49,8 +49,8 @@ int main(int argc, char* argv[]) {
 		}
 		fprintf(fp4, "%s", cons_info);
 		/* END CRITICAL SECTION */
-		pthread_mutex_unlock(&bufp->buffer_lock);
 		pthread_cond_signal(&bufp->non_full);
+		pthread_mutex_unlock(&bufp->buffer_lock);
 	}
 	
 	fclose(fp4);
@@ -61,12 +61,12 @@ int main(int argc, char* argv[]) {
 //Get the next item from buffer and put it in *itemp.
 void get_item(item_t *itemp)
 {
-	fprintf(stderr, "bufout = %d before remove\n", bufp->bufout);
+	//fprintf(stderr, "bufout = %d before remove\n", bufp->bufout);
 	fprintf(stderr, "num_items = %d before remove\n", bufp->num_items);
 	*itemp = bufp->buffer[bufp->bufout];
 	bufp->bufout = (bufp->bufout + 1) % BUFSIZE;
 	bufp->num_items--;
-	fprintf(stderr, "bufout = %d after remove\n", bufp->bufout);
+	//fprintf(stderr, "bufout = %d after remove\n", bufp->bufout);
 	fprintf(stderr, "num_items = %d after remove\n", bufp->num_items);
 	fprintf(stderr, "take one item!\n");
 }
