@@ -52,10 +52,10 @@ int main(int argc, char* argv[]) {
 //Get the next item from buffer and put it in *itemp.
 void get_item(char* item_string)
 {
-	fprintf(stderr, "num_items = %d before remove\n", bufp->num_items);
+	fprintf(stderr, "before remove\n");
 	strcpy(item_string, bufp->items[bufp->bufout]);
 	bufp->bufout = (bufp->bufout + 1) % BUFSIZE;
 	bufp->num_items--;
-	fprintf(stderr, "num_items = %d after remove\n", bufp->num_items);
+	fprintf(stderr, "after remove\n");
 	fprintf(stderr, "take one item!\n");
 }
