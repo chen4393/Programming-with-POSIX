@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 	
 	int i;
 	item_t item;
-	char cons_info[256];
+	char cons_info[STRING_LEN];
 	for(i = 0; i < 3 * ITERATIONS; i++) {
 		pthread_mutex_lock(&(bufp->buffer_lock));
 		while(bufp->num_items == 0)
@@ -61,12 +61,10 @@ int main(int argc, char* argv[]) {
 //Get the next item from buffer and put it in *itemp.
 void get_item(item_t *itemp)
 {
-	//fprintf(stderr, "bufout = %d before remove\n", bufp->bufout);
 	fprintf(stderr, "num_items = %d before remove\n", bufp->num_items);
 	*itemp = bufp->buffer[bufp->bufout];
 	bufp->bufout = (bufp->bufout + 1) % BUFSIZE;
 	bufp->num_items--;
-	//fprintf(stderr, "bufout = %d after remove\n", bufp->bufout);
 	fprintf(stderr, "num_items = %d after remove\n", bufp->num_items);
 	fprintf(stderr, "take one item!\n");
 }

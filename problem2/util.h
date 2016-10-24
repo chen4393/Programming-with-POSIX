@@ -3,7 +3,8 @@
 #include <stdio.h>
 
 #define BUFSIZE 2
-#define ITERATIONS 10
+#define STRING_LEN 256
+#define ITERATIONS 1000
 #define DEBUG
 
 typedef enum color_type {
@@ -18,13 +19,14 @@ typedef struct item_type {
 }item_t;
 
 typedef struct buffer_type {
-	item_t buffer[BUFSIZE];
-	int num_items;
-	pthread_mutex_t buffer_lock;
-	pthread_cond_t non_full;
-	pthread_cond_t non_empty;
-	int bufin;
-	int bufout;
+	int num_items;//the number of items in the shared buffer
+	pthread_mutex_t buffer_lock;//the mutex lock for mutual exclusion access to the buffer
+	pthread_cond_t non_full;//the condition variable producers have to wait 
+	pthread_cond_t non_empty;//the condition variable consumer has to wait
+	int bufin;//the start index producers needs to begin depositing
+	int bufout;//the start index consumer needs to begin removing 
+	char items[BUFSIZE][STRING_LEN];//the string contents of the buffer
+	item_t buffer[BUFSIZE];//the color and timestamp tags
 }buffer_t;
 
 

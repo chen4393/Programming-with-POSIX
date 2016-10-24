@@ -3,9 +3,11 @@
 #include <sys/shm.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <string.h>
 #include "util.h"
 
 buffer_t *bufp;       /* pointer to shared memory */
+char prod_info[STRING_LEN];		//string item to be deposited
 
 int main(int argc, char* argv[]) {
 	int shm_id;         /* shared memory identifier */
@@ -44,7 +46,6 @@ int main(int argc, char* argv[]) {
 			break;
 	}
 	int i;
-	char prod_info[256];
 	item_t item;
 	struct timeval time_prod;
 	for(i = 0; i < ITERATIONS; i++) {
@@ -56,13 +57,10 @@ int main(int argc, char* argv[]) {
 			while(bufp->num_items != 0)
 				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
 			/* START CRITICAL SECTION */
-			//fprintf(stderr, "Producer RED enter the CRITICAL SECTION!\n");
 			item.color = RED;//generate a new item
 			gettimeofday(&time_prod, NULL);
 			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			//fprintf(stderr, "Producer RED finish creating an item!\n");
 			put_item(item);
-			//fprintf(stderr, "Producer RED FINISH depositing an item!\n");
 			sprintf(prod_info, "RED %d\n", item.timestamp);//generate the corresponding string
 			fprintf(fp1, "%s", prod_info);
 			/* END CRITICAL SECTION */
@@ -119,13 +117,11 @@ int main(int argc, char* argv[]) {
 //Put item into  buffer at position bufin and update bufin.
 void put_item(item_t item)
 {
-	//fprintf(stderr, "WE ARE IN THE PUT FUNCTION!\n");
-	//fprintf(stderr, "bufin = %d before insert\n", bufp->bufin);
 	fprintf(stderr, "num_items = %d before insert\n", bufp->num_items);
 	bufp->buffer[bufp->bufin] = item;
+	strcpy(bufp->items[bufp->bufin], prod_info);
 	bufp->bufin = (bufp->bufin + 1) % BUFSIZE;
 	bufp->num_items++;
-	//fprintf(stderr, "bufin = %d after insert\n", bufp->bufin);
 	fprintf(stderr, "num_items = %d after insert\n", bufp->num_items);
 	fprintf(stderr, "put one item!\n");
 	return;

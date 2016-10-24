@@ -60,7 +60,7 @@ int main() {
 				case 0: execl ("./Consumer", keystr, NULL);
 			}
 		}
-		usleep(1000);
+		usleep(10);
 	}
 	/* Wait for children to exit. */
 	int status;
