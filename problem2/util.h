@@ -31,7 +31,7 @@ typedef struct buffer_type {
 
 
 
-FILE *fp1, *fp2, *fp3, *fp4, *fp5;
+FILE *fp1, *fp2, *fp3, *fp4;
 
 void get_item(char* item_string);
 void put_item(char* item_string);

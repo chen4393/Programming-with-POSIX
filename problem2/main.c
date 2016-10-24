@@ -48,7 +48,6 @@ int main() {
 	bufp->bufin = 0;
 	bufp->bufout = 0;
 	
-	fp5 = fopen("log.txt", "w+");
 	//producers and consumer creation
 	int i;
 	pid_t childpid[4];
@@ -81,7 +80,7 @@ int main() {
 	
 	//done with the program, so detach the shared segment and terminate
 	shmctl(shm_id, IPC_RMID, NULL);
-	fclose(fp5);
+
 	return 0;
 }
 /*
