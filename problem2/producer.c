@@ -7,7 +7,7 @@
 #include "util.h"
 
 buffer_t *bufp;       /* pointer to shared memory */
-char prod_info[STRING_LEN];		//string item to be deposited
+
 
 int main(int argc, char* argv[]) {
 	int shm_id;         /* shared memory identifier */
@@ -51,11 +51,10 @@ int main(int argc, char* argv[]) {
 	}
 	int i;
 	item_t item;
+	char prod_info[STRING_LEN];		//string item to be deposited
 	struct timeval time_prod;
 	for(i = 0; i < ITERATIONS; i++) {
-		
 		if(color == 1) {
-			
 			pthread_mutex_lock(&(bufp->buffer_lock));
 			//fprintf(stderr, "Producer RED grab the lock!\n");
 			while(bufp->num_items != 0)
@@ -64,8 +63,9 @@ int main(int argc, char* argv[]) {
 			item.color = RED;//generate a new item
 			gettimeofday(&time_prod, NULL);
 			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			put_item(item);
+			
 			sprintf(prod_info, "RED %d\n", item.timestamp);//generate the corresponding string
+			put_item(prod_info);
 			fprintf(fp1, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			pthread_cond_signal(&bufp->non_empty);
@@ -79,8 +79,9 @@ int main(int argc, char* argv[]) {
 			item.color = BLACK;//generate a new item
 			gettimeofday(&time_prod, NULL);
 			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			put_item(item);
+			
 			sprintf(prod_info, "BLACK %d\n", item.timestamp);//generate the corresponding string
+			put_item(prod_info);
 			fprintf(fp2, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			pthread_cond_signal(&bufp->non_empty);
@@ -94,13 +95,15 @@ int main(int argc, char* argv[]) {
 			item.color = WHITE;//generate a new item
 			gettimeofday(&time_prod, NULL);
 			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			put_item(item);
+			
 			sprintf(prod_info, "WHITE %d\n", item.timestamp);//generate the corresponding string
+			put_item(prod_info);
 			fprintf(fp3, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			pthread_cond_signal(&bufp->non_empty);
 			pthread_mutex_unlock(&bufp->buffer_lock);
 		}
+		//usleep(1000);
 	}
 	
 	switch(color) {
@@ -119,11 +122,9 @@ int main(int argc, char* argv[]) {
 }
 
 //Put item into  buffer at position bufin and update bufin.
-void put_item(item_t item)
-{
+void put_item(char* item_string) {
 	fprintf(stderr, "num_items = %d before insert\n", bufp->num_items);
-	bufp->buffer[bufp->bufin] = item;
-	strcpy(bufp->items[bufp->bufin], prod_info);
+	strcpy(bufp->items[bufp->bufin], item_string);
 	bufp->bufin = (bufp->bufin + 1) % BUFSIZE;
 	bufp->num_items++;
 	fprintf(stderr, "num_items = %d after insert\n", bufp->num_items);

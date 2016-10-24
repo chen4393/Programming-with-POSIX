@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/shm.h>
 #include <stdlib.h>
+#include <string.h>
 #include "util.h"
 
 buffer_t *bufp;       /* pointer to shared memory */
@@ -30,23 +31,13 @@ int main(int argc, char* argv[]) {
 	fp4 = fopen("Consumer.txt", "w+");
 	
 	int i;
-	item_t item;
 	char cons_info[STRING_LEN];
 	for(i = 0; i < 3 * ITERATIONS; i++) {
 		pthread_mutex_lock(&(bufp->buffer_lock));
 		while(bufp->num_items == 0)
 			while(pthread_cond_wait(&bufp->non_empty, &bufp->buffer_lock) != 0);
 		/* START CRITICAL SECTION */
-		get_item(&item);
-		if(item.color == RED) {
-			sprintf(cons_info, "RED %d\n", item.timestamp);
-		}
-		else if(item.color == BLACK) {
-			sprintf(cons_info, "BLACK %d\n", item.timestamp);
-		}
-		else {
-			sprintf(cons_info, "WHITE %d\n", item.timestamp);
-		}
+		get_item(cons_info);
 		fprintf(fp4, "%s", cons_info);
 		/* END CRITICAL SECTION */
 		pthread_cond_signal(&bufp->non_full);
@@ -59,10 +50,10 @@ int main(int argc, char* argv[]) {
 }
 
 //Get the next item from buffer and put it in *itemp.
-void get_item(item_t *itemp)
+void get_item(char* item_string)
 {
 	fprintf(stderr, "num_items = %d before remove\n", bufp->num_items);
-	*itemp = bufp->buffer[bufp->bufout];
+	strcpy(item_string, bufp->items[bufp->bufout]);
 	bufp->bufout = (bufp->bufout + 1) % BUFSIZE;
 	bufp->num_items--;
 	fprintf(stderr, "num_items = %d after remove\n", bufp->num_items);

@@ -4,7 +4,7 @@
 
 #define BUFSIZE 2
 #define STRING_LEN 256
-#define ITERATIONS 2
+#define ITERATIONS 1000
 #define DEBUG
 
 typedef enum color_type {
@@ -31,7 +31,7 @@ typedef struct buffer_type {
 
 
 
-FILE *fp1, *fp2, *fp3, *fp4;
+FILE *fp1, *fp2, *fp3, *fp4, *fp5;
 
-void get_item(item_t *itemp);
-void put_item(item_t item);
+void get_item(char* item_string);
+void put_item(char* item_string);

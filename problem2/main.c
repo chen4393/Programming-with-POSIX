@@ -38,13 +38,17 @@ int main() {
 	pthread_mutexattr_setpshared(&mutexattr, PTHREAD_PROCESS_SHARED);
 	pthread_mutex_init(&(bufp->buffer_lock), &mutexattr);
 	
-	pthread_cond_init(&(bufp->non_empty), NULL);
-	pthread_cond_init(&(bufp->non_full), NULL);
+	pthread_condattr_t condattr;
+	pthread_condattr_init(&condattr);
+	pthread_condattr_setpshared(&condattr, PTHREAD_PROCESS_SHARED);
+	pthread_cond_init(&(bufp->non_empty), &condattr);
+	pthread_cond_init(&(bufp->non_full), &condattr);
 	
 	bufp->num_items = 0;
 	bufp->bufin = 0;
 	bufp->bufout = 0;
 	
+	fp5 = fopen("log.txt", "w+");
 	//producers and consumer creation
 	int i;
 	pid_t childpid[4];
@@ -60,7 +64,7 @@ int main() {
 				case 0: execl ("./Consumer", keystr, NULL);
 			}
 		}
-		usleep(10);
+		//usleep(10);
 	}
 	/* Wait for children to exit. */
 	int status;
@@ -77,7 +81,7 @@ int main() {
 	
 	//done with the program, so detach the shared segment and terminate
 	shmctl(shm_id, IPC_RMID, NULL);
-	
+	fclose(fp5);
 	return 0;
 }
 /*
