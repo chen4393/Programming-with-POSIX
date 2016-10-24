@@ -54,9 +54,9 @@ int main() {
 		childpid[i] = fork();
 		if(childpid[i] == 0) {
 			switch(i) {
-				case 1: execl ("./Producer", "1", keystr, NULL);
-				case 2: execl ("./Producer", "2", keystr, NULL);
-				case 3: execl ("./Producer", "3", keystr, NULL);
+				case 1: execl ("./Producer", "RED", keystr, NULL);
+				case 2: execl ("./Producer", "BLACK", keystr, NULL);
+				case 3: execl ("./Producer", "WHITE", keystr, NULL);
 				case 0: execl ("./Consumer", keystr, NULL);
 			}
 		}

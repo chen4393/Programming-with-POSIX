@@ -4,7 +4,7 @@
 
 #define BUFSIZE 2
 #define STRING_LEN 256
-#define ITERATIONS 1000
+#define ITERATIONS 2
 #define DEBUG
 
 typedef enum color_type {

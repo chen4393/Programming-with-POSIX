@@ -29,21 +29,25 @@ int main(int argc, char* argv[]) {
 	fprintf(stderr, "Producer Got bufp = %p\n", bufp);
 	
 	//3 branches
-	int color = atoi(argv[0]);
-	//fprintf(stderr, "color is %d\n", color);
-	switch(color) {
-		case 1:
-			fprintf(stderr, "Producer RED arrived!\n");
-			fp1 = fopen("Producer_RED.txt", "w+");
-			break;	
-		case 2:
-			fprintf(stderr, "Producer BLACK arrived!\n");
-			fp2 = fopen("Producer_BLACK.txt", "w+");
-			break;
-		case 3:
-			fprintf(stderr, "Producer WHITE arrived!\n");
-			fp3 = fopen("Producer_WHITE.txt", "w+");
-			break;
+	int color;//color flag
+	if(strcmp("RED", argv[0]) == 0) {
+		fprintf(stderr, "Producer RED arrived!\n");
+		fp1 = fopen("Producer_RED.txt", "w+");
+		color = 1;
+	}
+	else if(strcmp("BLACK", argv[0]) == 0) {
+		fprintf(stderr, "Producer BLACK arrived!\n");
+		fp2 = fopen("Producer_BLACK.txt", "w+");
+		color = 2;
+	}
+	else if(strcmp("WHITE", argv[0]) == 0) {
+		fprintf(stderr, "Producer WHITE arrived!\n");
+		fp3 = fopen("Producer_WHITE.txt", "w+");
+		color = 3;
+	}
+	else {
+		fprintf(stderr, "Invalid COLOR!\n");
+		return -1;
 	}
 	int i;
 	item_t item;
