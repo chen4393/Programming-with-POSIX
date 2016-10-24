@@ -7,17 +7,6 @@
 #define ITERATIONS 1000
 #define DEBUG
 
-typedef enum color_type {
-	RED, 
-	BLACK, 
-	WHITE
-}color_t;
-
-typedef struct item_type {
-	color_t color; 	
-	int timestamp;
-}item_t;
-
 typedef struct buffer_type {
 	int num_items;//the number of items in the shared buffer
 	pthread_mutex_t buffer_lock;//the mutex lock for mutual exclusion access to the buffer
@@ -26,7 +15,6 @@ typedef struct buffer_type {
 	int bufin;//the start index producers needs to begin depositing
 	int bufout;//the start index consumer needs to begin removing 
 	char items[BUFSIZE][STRING_LEN];//the string contents of the buffer
-	item_t buffer[BUFSIZE];//the color and timestamp tags
 }buffer_t;
 
 

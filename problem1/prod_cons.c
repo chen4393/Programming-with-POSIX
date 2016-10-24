@@ -12,28 +12,6 @@
 #include "util.h"
 
 int main() {
-	//Shared Buffer
-	int shm_id;//shared memory id
-	key_t key = 4455;
-	int flag = 1023;
-	//shared memory segment creation
-	shm_id = shmget (key, BUFSIZE * sizeof(item_t), flag);
-	if(shm_id == -1) {
-		perror("shmget failed");
-		exit(1);
-	}
-	#ifdef DEBUG
-	printf("Got shmem id = %d\n", shm_id);
-	#endif
-	//shared memory segment attachment
-	buffer = shmat(shm_id, (void *)NULL, flag);
-	if (buffer == (void *) -1) {
-		perror ("shmat failed");
-		exit (2);
-	}
-	#ifdef DEBUG
-	printf ("Got ptr = %p\n", buffer);
-	#endif
 
 	//Log Files
 	fp1 = fopen("Producer_RED.txt", "w+");
@@ -71,7 +49,7 @@ int main() {
 	sem_destroy(&empty); /* destroy semaphore */
 	sem_destroy(&full); /* destroy semaphore */
 	//done with the program, so detach the shared segment and terminate
-	shmctl(shm_id, IPC_RMID, NULL);
+	//shmctl(shm_id, IPC_RMID, NULL);
 	
 	//Close log files
 	fclose(fp1);
@@ -86,18 +64,15 @@ void * producer(void * arg) {
 	int tid = *((int *)arg);
 	int i;
 	char prod_info[256];
-	item_t item;
 	struct timeval time_prod;
 	for(i = 0; i < ITERATIONS; i++) {
 		if(tid == 0) {
 			sem_wait(&empty);
 			sem_wait(&mutex);
 			/* START CRITICAL SECTION */
-			item.color = RED;//generate a new item
 			gettimeofday(&time_prod, NULL);
-			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			item_deposit(item);//deposit the item
-			sprintf(prod_info, "RED %d\n", item.timestamp);//generate the corresponding string
+			sprintf(prod_info, "RED %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			item_deposit(prod_info);//deposit the item
 			fprintf(fp1, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			sem_post(&mutex);
@@ -107,11 +82,9 @@ void * producer(void * arg) {
 			sem_wait(&empty);
 			sem_wait(&mutex);
 			/* START CRITICAL SECTION */
-			item.color = BLACK;//generate a new item
 			gettimeofday(&time_prod, NULL);
-			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			item_deposit(item);//deposit the item
-			sprintf(prod_info, "BLACK %d\n", item.timestamp);//generate the corresponding string
+			sprintf(prod_info, "BLACK %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			item_deposit(prod_info);//deposit the item
 			fprintf(fp2, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			sem_post(&mutex);
@@ -121,11 +94,9 @@ void * producer(void * arg) {
 			sem_wait(&empty);
 			sem_wait(&mutex);
 			/* START CRITICAL SECTION */
-			item.color = WHITE;//generate a new item
 			gettimeofday(&time_prod, NULL);
-			item.timestamp = (int)time_prod.tv_usec;//record the timestamp
-			item_deposit(item);//deposit the item
-			sprintf(prod_info, "WHITE %d\n", item.timestamp);//generate the corresponding string
+			sprintf(prod_info, "WHITE %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			item_deposit(prod_info);//deposit the item
 			fprintf(fp3, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			sem_post(&mutex);
@@ -138,22 +109,12 @@ void * producer(void * arg) {
 
 void * consumer(void * arg) {
 	int i;
-	item_t item;
 	char cons_info[256];
 	for(i = 0; i < 3 * ITERATIONS; i++) {
 		sem_wait(&full);
 		sem_wait(&mutex);
 		/* START CRITICAL SECTION */
-		item_remove(&item);
-		if(item.color == RED) {
-			sprintf(cons_info, "RED %d\n", item.timestamp);
-		}
-		else if(item.color == BLACK) {
-			sprintf(cons_info, "BLACK %d\n", item.timestamp);
-		}
-		else {
-			sprintf(cons_info, "WHITE %d\n", item.timestamp);
-		}
+		item_remove(cons_info);
 		fprintf(fp4, "%s", cons_info);
 		/* END CRITICAL SECTION */
 		sem_post(&mutex);
@@ -163,14 +124,14 @@ void * consumer(void * arg) {
 	pthread_exit(0);
 }
 
-void item_deposit(item_t item) {
-	buffer[tail] = item;
+void item_deposit(char* item_string) {
+	strcpy(buffer[tail], item_string);
 	tail = (tail + 1) % BUFSIZE;
 	fprintf(stderr, "Deposit one item!\n");
 }
 
-void item_remove(item_t * item) {
-	*item = buffer[head];
+void item_remove(char* item_string) {
+	strcpy(item_string, buffer[head]);
 	head = (head + 1) % BUFSIZE;
 	fprintf(stderr, "Remove one item!\n");
 }

@@ -1,13 +1,13 @@
-all: prod_cons Producer Consumer
+all: prod_cons 1Producer 2Consumer
 
 prod_cons: main.c
 	cc main.c -o prod_cons -lpthread
 
-Producer: producer.c
-	cc producer.c -o Producer
+1Producer: producer.c
+	cc producer.c -o 1Producer
 
-Consumer: consumer.c
-	cc consumer.c -o Consumer
+2Consumer: consumer.c
+	cc consumer.c -o 2Consumer
 
 clean:
-	rm prod_cons Producer Consumer *.o *.txt
+	rm prod_cons 1Producer 2Consumer *.o *.txt

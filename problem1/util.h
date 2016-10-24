@@ -2,8 +2,9 @@
 #include <stdio.h>
 
 #define BUFSIZE 2
+#define STRING_LEN 256
 #define ITERATIONS 1000
-#define DEBUG
+//#define DEBUG
 
 typedef enum color_type {
 	RED, 
@@ -16,7 +17,7 @@ typedef struct item_type {
 	int timestamp;
 }item_t;
 
-item_t *buffer;
+char buffer[BUFSIZE][STRING_LEN];
 
 int head = 0;
 int tail = 0;
@@ -29,5 +30,5 @@ FILE *fp1, *fp2, *fp3, *fp4;
 
 void * producer(void *);
 void * consumer(void *);
-void item_deposit(item_t item);
-void item_remove(item_t * item);
+void item_deposit(char* item_string);
+void item_remove(char* item_string);
