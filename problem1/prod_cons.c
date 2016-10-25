@@ -71,7 +71,7 @@ void * producer(void * arg) {
 			sem_wait(&mutex);
 			/* START CRITICAL SECTION */
 			gettimeofday(&time_prod, NULL);
-			sprintf(prod_info, "RED %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			sprintf(prod_info, "RED %ld\n", (long)(time_prod.tv_usec));//generate the corresponding string
 			item_deposit(prod_info);//deposit the item
 			fprintf(fp1, "%s", prod_info);
 			/* END CRITICAL SECTION */
@@ -83,7 +83,7 @@ void * producer(void * arg) {
 			sem_wait(&mutex);
 			/* START CRITICAL SECTION */
 			gettimeofday(&time_prod, NULL);
-			sprintf(prod_info, "BLACK %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			sprintf(prod_info, "BLACK %ld\n", (long)(time_prod.tv_usec));//generate the corresponding string
 			item_deposit(prod_info);//deposit the item
 			fprintf(fp2, "%s", prod_info);
 			/* END CRITICAL SECTION */
@@ -95,7 +95,7 @@ void * producer(void * arg) {
 			sem_wait(&mutex);
 			/* START CRITICAL SECTION */
 			gettimeofday(&time_prod, NULL);
-			sprintf(prod_info, "WHITE %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			sprintf(prod_info, "WHITE %ld\n", (long)(time_prod.tv_usec));//generate the corresponding string
 			item_deposit(prod_info);//deposit the item
 			fprintf(fp3, "%s", prod_info);
 			/* END CRITICAL SECTION */
@@ -127,12 +127,12 @@ void * consumer(void * arg) {
 void item_deposit(char* item_string) {
 	strcpy(buffer[tail], item_string);
 	tail = (tail + 1) % BUFSIZE;
-	fprintf(stderr, "Deposit one item!\n");
+	//fprintf(stderr, "Deposit one item!\n");
 }
 
 void item_remove(char* item_string) {
 	strcpy(item_string, buffer[head]);
 	head = (head + 1) % BUFSIZE;
-	fprintf(stderr, "Remove one item!\n");
+	//fprintf(stderr, "Remove one item!\n");
 }
 
