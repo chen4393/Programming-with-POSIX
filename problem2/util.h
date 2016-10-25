@@ -4,7 +4,7 @@
 
 #define BUFSIZE 2
 #define STRING_LEN 256
-#define ITERATIONS 1000
+#define ITERATIONS 2
 #define DEBUG
 
 typedef struct buffer_type {
@@ -15,11 +15,12 @@ typedef struct buffer_type {
 	int bufin;//the start index producers needs to begin depositing
 	int bufout;//the start index consumer needs to begin removing 
 	char items[BUFSIZE][STRING_LEN];//the string contents of the buffer
+	pthread_mutexattr_t mutexattr;
+	pthread_condattr_t condattr;
+	char log[STRING_LEN];
 }buffer_t;
 
-
-
-FILE *fp1, *fp2, *fp3, *fp4;
+FILE *fp1, *fp4;
 
 void get_item(char* item_string);
 void put_item(char* item_string);

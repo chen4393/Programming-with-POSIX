@@ -14,7 +14,7 @@ int main() {
 	key_t key = 4400;
 	//int flag = 1023;
 	//shared memory segment creation
-	shm_id = shmget (key, sizeof(buffer_t), IPC_CREAT | 0666);
+	shm_id = shmget(key, sizeof(buffer_t), IPC_CREAT | 0666);
 	if(shm_id == -1) {
 		perror("shmget failed");
 		exit(1);
@@ -23,7 +23,7 @@ int main() {
 	printf("Got shmem id = %d\n", shm_id);
 	#endif
 	//shared memory segment attachment
-	bufp = shmat(shm_id, (void *)NULL, 0);
+	bufp = (buffer_t *)shmat(shm_id, (void *)NULL, 1023);
 	if (bufp == (void *) -1) {
 		perror ("shmat failed");
 		exit (2);
@@ -31,23 +31,29 @@ int main() {
 	#ifdef DEBUG
 	printf("Got ptr = %p\n", bufp);
 	#endif
-	
+
 	//Synchronization Primitive: Mutex and Condition Variable
-	pthread_mutexattr_t mutexattr;
-	pthread_mutexattr_init(&mutexattr);
-	pthread_mutexattr_setpshared(&mutexattr, PTHREAD_PROCESS_SHARED);
-	pthread_mutex_init(&(bufp->buffer_lock), &mutexattr);
+	int rtn;
+	if((rtn = pthread_mutexattr_init(&bufp->mutexattr)) != 0)
+		fprintf(stderr,"pthreas_mutexattr_init: %s",strerror(rtn)),exit(1);
+	if((rtn = pthread_mutexattr_setpshared(&bufp->mutexattr, PTHREAD_PROCESS_SHARED)) != 0)
+		fprintf(stderr,"pthread_mutexattr_setpshared %s",strerror(rtn)),exit(1);
+	if((rtn = pthread_mutex_init(&bufp->buffer_lock, &bufp->mutexattr)) != 0)
+		fprintf(stderr,"pthread_mutex_init %s",strerror(rtn)), exit(1);
 	
-	pthread_condattr_t condattr;
-	pthread_condattr_init(&condattr);
-	pthread_condattr_setpshared(&condattr, PTHREAD_PROCESS_SHARED);
-	pthread_cond_init(&(bufp->non_empty), &condattr);
-	pthread_cond_init(&(bufp->non_full), &condattr);
+	if((rtn = pthread_condattr_init(&bufp->condattr)) != 0)
+		fprintf(stderr,"pthreas_condattr_init: %s",strerror(rtn)),exit(1);
+	if((rtn = pthread_condattr_setpshared(&bufp->condattr, PTHREAD_PROCESS_SHARED)) != 0)
+		fprintf(stderr,"pthreas_condattr_setpshared: %s",strerror(rtn)),exit(1);
+	if((rtn = pthread_cond_init(&bufp->non_empty, &bufp->condattr)) != 0)
+		fprintf(stderr,"pthreas_condattr_init: %s",strerror(rtn)),exit(1);
+	if((rtn = pthread_cond_init(&bufp->non_full, &bufp->condattr)) != 0)
+		fprintf(stderr,"pthreas_condattr_init: %s",strerror(rtn)),exit(1);
 	
 	bufp->num_items = 0;
 	bufp->bufin = 0;
 	bufp->bufout = 0;
-	
+	strcpy(bufp->log, "INFO IN SHARED MEMORY");
 	//producers and consumer creation
 	int i;
 	pid_t childpid[4];

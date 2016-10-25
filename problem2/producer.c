@@ -4,47 +4,42 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <string.h>
+#include <pthread.h>
 #include "util.h"
 
 buffer_t *bufp;       /* pointer to shared memory */
 
-
 int main(int argc, char* argv[]) {
 	int shm_id;         /* shared memory identifier */
-	shm_id = shmget (atoi(argv[1]), sizeof(buffer_t), 0);
-	if (shm_id == -1)
-	{
+	shm_id = shmget(atoi(argv[1]), 0, 0);
+	if (shm_id == -1) {
 		perror ("Producer shmget failed");
 		exit (1);
 	}
 	#ifdef DEBUG
 	printf("Producer Got shmem id = %d\n", shm_id);
 	#endif
-	bufp = shmat (shm_id, (void *) NULL, 0);
-    if (bufp == (void *) -1)
-	{
+	bufp = (buffer_t *)shmat (shm_id, (void *) NULL, 0);
+    if (bufp == (void *) -1) {
 		perror ("Producer shmat failed");
 		exit (2);
 	}
-	fprintf(stderr, "Producer Got bufp = %p\n", bufp);
+	fprintf(stderr, "Producer %s Got bufp = %p, %s\n", argv[0], bufp, bufp->log);
 	
-	//3 branches
-	int color;//color flag
-	if(strcmp("RED", argv[0]) == 0) {
-		fprintf(stderr, "Producer RED arrived!\n");
+	int rtn;
+	if ((rtn = pthread_mutex_lock(&bufp->buffer_lock)) != 0)
+		fprintf(stderr,"%s: pthread_mutex_lock %s",argv[0], strerror(rtn)),exit(1);
+	if ((rtn = pthread_mutex_unlock(&bufp->buffer_lock)) != 0)
+		fprintf(stderr,"%s: pthread_mutex_unlock %s",argv[0], strerror(rtn)),exit(1);
+	if ((rtn = pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock)) != 0)
+		fprintf(stderr,"%s: pthread_cond_wait %s",argv[0], strerror(rtn)),exit(1);
+	
+	if(strcmp("RED", argv[0]) == 0)
 		fp1 = fopen("Producer_RED.txt", "w+");
-		color = 1;
-	}
-	else if(strcmp("BLACK", argv[0]) == 0) {
-		fprintf(stderr, "Producer BLACK arrived!\n");
-		fp2 = fopen("Producer_BLACK.txt", "w+");
-		color = 2;
-	}
-	else if(strcmp("WHITE", argv[0]) == 0) {
-		fprintf(stderr, "Producer WHITE arrived!\n");
-		fp3 = fopen("Producer_WHITE.txt", "w+");
-		color = 3;
-	}
+	else if(strcmp("BLACK", argv[0]) == 0)
+		fp1 = fopen("Producer_BLACK.txt", "w+");
+	else if(strcmp("WHITE", argv[0]) == 0)
+		fp1 = fopen("Producer_WHITE.txt", "w+");
 	else {
 		fprintf(stderr, "Invalid COLOR!\n");
 		return -1;
@@ -53,61 +48,21 @@ int main(int argc, char* argv[]) {
 	char prod_info[STRING_LEN];		//string item to be deposited
 	struct timeval time_prod;
 	for(i = 0; i < ITERATIONS; i++) {
-		if(color == 1) {
 			pthread_mutex_lock(&(bufp->buffer_lock));
-			//fprintf(stderr, "Producer RED grab the lock!\n");
 			while(bufp->num_items != 0)
 				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
 			/* START CRITICAL SECTION */
 			gettimeofday(&time_prod, NULL);
-			sprintf(prod_info, "RED %d\n", (int)time_prod.tv_usec);//generate the corresponding string
+			sprintf(prod_info, "%s %d\n", argv[0], (int)time_prod.tv_usec);//generate the corresponding string
 			put_item(prod_info);
 			fprintf(fp1, "%s", prod_info);
 			/* END CRITICAL SECTION */
 			pthread_cond_signal(&bufp->non_empty);
 			pthread_mutex_unlock(&bufp->buffer_lock);
-		}
-		else if(color == 2) {
-			pthread_mutex_lock(&(bufp->buffer_lock));
-			while(bufp->num_items != 0)
-				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
-			/* START CRITICAL SECTION */
-			gettimeofday(&time_prod, NULL);
-			sprintf(prod_info, "BLACK %d\n", (int)time_prod.tv_usec);//generate the corresponding string
-			put_item(prod_info);
-			fprintf(fp2, "%s", prod_info);
-			/* END CRITICAL SECTION */
-			pthread_cond_signal(&bufp->non_empty);
-			pthread_mutex_unlock(&bufp->buffer_lock);
-		}
-		else {
-			pthread_mutex_lock(&(bufp->buffer_lock));
-			while(bufp->num_items != 0)
-				while(pthread_cond_wait(&bufp->non_full, &bufp->buffer_lock) != 0);
-			/* START CRITICAL SECTION */
-			gettimeofday(&time_prod, NULL);
-			sprintf(prod_info, "WHITE %d\n", (int)time_prod.tv_usec);//generate the corresponding string
-			put_item(prod_info);
-			fprintf(fp3, "%s", prod_info);
-			/* END CRITICAL SECTION */
-			pthread_cond_signal(&bufp->non_empty);
-			pthread_mutex_unlock(&bufp->buffer_lock);
-		}
-		//usleep(1000);
 	}
 	
-	switch(color) {
-		case 1:
-			fclose(fp1);
-			break;	
-		case 2:
-			fclose(fp2);
-			break;
-		case 3:
-			fclose(fp3);
-			break;
-	}
-	
+	fclose(fp1);
+
 	return 0;
 }
 
