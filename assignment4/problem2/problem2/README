@@ -1,0 +1,7 @@
+To compile the code, you can follow the following steps:
+
+1. type "make clean" to remove some redundant files
+2. type "make" to build the executable file "prod_con"
+3. type "./prod_con" to run the program
+4. check some log files in the directory
+5. you'd better type "make clean" everytime you want to build it again
